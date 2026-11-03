@@ -14,6 +14,11 @@ export function calcDeliveryFee(
   orderAmount: number,
   options: DeliveryOptions = {},
 ): number {
+    
+    if (!Number.isFinite(orderAmount) || orderAmount < 0) {
+    throw new Error('INVALID_ORDER_AMOUNT');
+    }
+
   if (orderAmount >= FREE_DELIVERY_THRESHOLD) return 0;
 
   const baseFee =
