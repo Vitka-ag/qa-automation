@@ -49,4 +49,17 @@ describe('calcDeliveryFee', () => {
     },
     );
 
+    it.each([
+        { weight: 5, expected: 100 },
+        { weight: 6, expected: 120 },
+        { weight: 7, expected: 140 },
+    ])(
+    'експрес-доставка для $weight кг коштує $expected грн',
+    ({ weight, expected }) => {
+        expect(
+        calcDeliveryFee(weight, 500, { express: true }),
+        ).toBe(expected);
+    },
+    );
+
 });
