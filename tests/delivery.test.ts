@@ -73,5 +73,18 @@ describe('calcDeliveryFee', () => {
         .toThrow('INVALID_ORDER_AMOUNT');
     },
     );
+    
+    it.each([
+    { weight: -1 },
+    { weight: 0 },
+    { weight: NaN },
+    { weight: Infinity },
+    ])(
+    'відхиляє некоректну вагу $weight',
+    ({ weight }) => {
+        expect(() => calcDeliveryFee(weight, 500))
+        .toThrow('INVALID_WEIGHT');
+    },
+    );
 
 });
