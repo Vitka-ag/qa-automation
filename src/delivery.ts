@@ -14,10 +14,13 @@ export function calcDeliveryFee(
   orderAmount: number,
   options: DeliveryOptions = {},
 ): number {
-    
-    if (!Number.isFinite(orderAmount) || orderAmount < 0) {
+  if (!Number.isFinite(weight) || weight <= 0) {
+    throw new Error('INVALID_WEIGHT');
+  }
+
+  if (!Number.isFinite(orderAmount) || orderAmount < 0) {
     throw new Error('INVALID_ORDER_AMOUNT');
-    }
+  }
 
   if (orderAmount >= FREE_DELIVERY_THRESHOLD) return 0;
 
