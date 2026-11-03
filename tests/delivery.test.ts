@@ -62,4 +62,16 @@ describe('calcDeliveryFee', () => {
     },
     );
 
+    it.each([
+    { amount: -1 },
+    { amount: NaN },
+    { amount: Infinity },
+    ])(
+    'відхиляє некоректну суму замовлення $amount',
+    ({ amount }) => {
+        expect(() => calcDeliveryFee(5, amount))
+        .toThrow('INVALID_ORDER_AMOUNT');
+    },
+    );
+
 });
