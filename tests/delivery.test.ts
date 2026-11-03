@@ -4,8 +4,8 @@ import { calcDeliveryFee } from '../src/delivery';
 
 describe('calcDeliveryFee', () => {
     it.each([
-    { weight: 1, expected: 50 },
-    { weight: 5, expected: 50 },
+        { weight: 1, expected: 50 },
+        { weight: 5, expected: 50 },
     ])(
     'базова доставка для $weight кг коштує $expected грн',
     ({ weight, expected }) => {
@@ -14,15 +14,26 @@ describe('calcDeliveryFee', () => {
     );
   
     it.each([
-    { weight: 5, expected: 50 },
-    { weight: 5.01, expected: 60 },
-    { weight: 6, expected: 60 },
-    { weight: 6.01, expected: 70 },
-    { weight: 7, expected: 70 },
+        { weight: 5, expected: 50 },
+        { weight: 5.01, expected: 60 },
+        { weight: 6, expected: 60 },
+        { weight: 6.01, expected: 70 },
+        { weight: 7, expected: 70 },
     ])(
     'доставка для $weight кг коштує $expected грн',
     ({ weight, expected }) => {
         expect(calcDeliveryFee(weight, 500)).toBe(expected);
+    },
+    );
+    
+    it.each([
+        { orderAmount: 999.99, expected: 50 },
+        { orderAmount: 1000, expected: 0 },
+        { orderAmount: 1000.01, expected: 0 },
+    ])(
+    'доставка для замовлення на $orderAmount грн коштує $expected грн',
+    ({ orderAmount, expected }) => {
+        expect(calcDeliveryFee(5, orderAmount)).toBe(expected);
     },
     );
 
