@@ -37,4 +37,16 @@ describe('calcDeliveryFee', () => {
     },
     );
 
+    it.each([
+    { weight: 29, expected: 290 },
+    { weight: 30, expected: 300 },
+    { weight: 30.01, expected: 300 },
+    { weight: 31, expected: 300 },
+    ])(
+    'обмежує вартість доставки для $weight кг до $expected грн',
+    ({ weight, expected }) => {
+        expect(calcDeliveryFee(weight, 500)).toBe(expected);
+    },
+    );
+
 });
