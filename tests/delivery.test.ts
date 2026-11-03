@@ -1,0 +1,15 @@
+
+import { describe, expect, it } from 'vitest';
+import { calcDeliveryFee } from '../src/delivery';
+
+describe('calcDeliveryFee', () => {
+  it.each([
+    { weight: 1, expected: 50 },
+    { weight: 5, expected: 50 },
+  ])(
+    'базова доставка для $weight кг коштує $expected грн',
+    ({ weight, expected }) => {
+      expect(calcDeliveryFee(weight, 500)).toBe(expected);
+    },
+  );
+});
