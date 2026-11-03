@@ -1,8 +1,13 @@
+
 export interface ParkingOptions {
   night?: boolean;
   weekend?: boolean;
 }
- 
+
+const FREE_MINUTES = 15;
+const FIRST_HOUR_FEE = 30;
+const EXTRA_HOUR_FEE = 20;
+
 export function calcParkingFee(
   minutes: number,
   options: ParkingOptions = {},
@@ -11,10 +16,9 @@ export function calcParkingFee(
     throw new Error('INVALID_DURATION');
   }
 
-    if (minutes <= 15) return 0;
-    if (minutes <= 60) return 30;
-    
-    const extraHours = Math.ceil((minutes - 60) / 60);
-    return 30 + extraHours * 20;
+  if (minutes <= FREE_MINUTES) return 0;
+  if (minutes <= 60) return FIRST_HOUR_FEE;
 
+  const extraHours = Math.ceil((minutes - 60) / 60);
+  return FIRST_HOUR_FEE + extraHours * EXTRA_HOUR_FEE;
 }
