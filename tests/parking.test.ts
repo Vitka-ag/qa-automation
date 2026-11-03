@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { calcParkingFee } from '../src/parking';
 
+
 describe('calcParkingFee', () => {
   it.each([-1, -60, 10.5])(
     'відхиляє некоректну тривалість %s',
@@ -30,6 +31,15 @@ describe('calcParkingFee', () => {
     { minutes: 180, expected: 70 },
     ])('тривалість $minutes → $expected', ({ minutes, expected }) => {
     expect(calcParkingFee(minutes)).toBe(expected);
+    });
+
+    it.each([
+    { minutes: 540, expected: 190 },
+    { minutes: 600, expected: 200 },
+    { minutes: 1440, expected: 200 },
+    ])('обмеження добової плати: $minutes → $expected',
+    ({ minutes, expected }) => {
+        expect(calcParkingFee(minutes)).toBe(expected);
     });
 
 });
