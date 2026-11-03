@@ -86,5 +86,19 @@ describe('calcDeliveryFee', () => {
         .toThrow('INVALID_WEIGHT');
     },
     );
+    
+    it.each([
+    { weight: 5, amount: 1000, expected: 0 },
+    { weight: 31, amount: 1000, expected: 0 },
+    { weight: 31, amount: 500, expected: 600 },
+    { weight: 30, amount: 500, expected: 600 },
+    ])(
+    'поєднання правил: $weight кг, замовлення $amount грн',
+    ({ weight, amount, expected }) => {
+        expect(
+        calcDeliveryFee(weight, amount, { express: true }),
+        ).toBe(expected);
+    },
+    );
 
 });
