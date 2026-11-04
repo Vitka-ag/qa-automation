@@ -8,23 +8,27 @@ export interface OrderRepository {
 export interface Notifier {
   send(email: string, text: string): Promise<void>;
 }
- 
-export interface OrderInput { id: string; amountUsd: number; email: string }
+
+export interface OrderInput {
+  id: string;
+  amountUsd: number;
+  email: string;
+}
 export interface OrderRecord extends OrderInput {
   amountUah: number;
   createdAt: string;
 }
- 
+
 export class OrderService {
   constructor(
     private rates: RateProvider,
     private repo: OrderRepository,
     private notifier: Notifier,
   ) {}
- 
+
   async placeOrder(order: OrderInput): Promise<OrderRecord> {
     if (order.amountUsd <= 0) throw new Error('INVALID_AMOUNT');
- 
+
     const rate = await this.rates.getRate('USD', 'UAH');
     const amountUah = Math.round(order.amountUsd * rate * 100) / 100;
     const record: OrderRecord = {
@@ -32,7 +36,7 @@ export class OrderService {
       amountUah,
       createdAt: new Date().toISOString(),
     };
- 
+
     await this.repo.save(record);
     await this.notifier.send(
       order.email,

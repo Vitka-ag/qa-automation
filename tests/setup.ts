@@ -1,7 +1,11 @@
-
-import { beforeAll, afterEach, afterAll } from 'vitest';
+import { beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { server } from './msw/server';
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+
+afterEach(() => {
+  server.resetHandlers();
+  vi.useRealTimers();
+});
+
 afterAll(() => server.close());

@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { OrderService } from '../src/order-service';
-import type { RateProvider, OrderRepository, Notifier } from '../src/order-service';
+import type {
+  RateProvider,
+  OrderRepository,
+  Notifier,
+} from '../src/order-service';
 import { InMemoryOrderRepository } from './fakes/in-memory-repository';
 import { withRetry } from '../src/retry';
 
@@ -9,41 +13,49 @@ describe('OrderService — заглушки й шпигуни', () => {
   let repo: OrderRepository;
   let notifier: Notifier;
   let service: OrderService;
- 
+
   beforeEach(() => {
-    rates = { getRate: vi.fn().mockResolvedValue(41) };             // stub
+    rates = { getRate: vi.fn().mockResolvedValue(41) }; // stub
     repo = {
-      save: vi.fn().mockResolvedValue(undefined),                   // spy
+      save: vi.fn().mockResolvedValue(undefined), // spy
       findById: vi.fn(),
     };
-    notifier = { send: vi.fn().mockResolvedValue(undefined) };      // spy
+    notifier = { send: vi.fn().mockResolvedValue(undefined) }; // spy
     service = new OrderService(rates, repo, notifier);
   });
- 
+
   it('конвертує суму за отриманим курсом', async () => {
-    const record = await service.placeOrder({ id: 'A-1', amountUsd: 100, email: 'u@e.com' });
+    const record = await service.placeOrder({
+      id: 'A-1',
+      amountUsd: 100,
+      email: 'u@e.com',
+    });
     expect(record.amountUah).toBeCloseTo(4100, 2);
   });
- 
+
   it('надсилає сповіщення з сумою в гривнях', async () => {
-    await service.placeOrder({ id: 'A-2', amountUsd: 10, email: 'client@e.com' });
- 
+    await service.placeOrder({
+      id: 'A-2',
+      amountUsd: 10,
+      email: 'client@e.com',
+    });
+
     expect(notifier.send).toHaveBeenCalledTimes(1);
     expect(notifier.send).toHaveBeenCalledWith(
       'client@e.com',
       expect.stringContaining('410'),
     );
   });
- 
+
   it('не звертається до залежностей за некоректної суми', async () => {
     await expect(
       service.placeOrder({ id: 'A-3', amountUsd: 0, email: 'u@e.com' }),
     ).rejects.toThrow('INVALID_AMOUNT');
- 
+
     expect(rates.getRate).not.toHaveBeenCalled();
     expect(repo.save).not.toHaveBeenCalled();
   });
-  
+
   it('збережене замовлення можна прочитати зі сховища', async () => {
     const repo = new InMemoryOrderRepository();
     const service = new OrderService(rates, repo, notifier);
@@ -60,13 +72,10 @@ describe('OrderService — заглушки й шпигуни', () => {
     expect(repo.size).toBe(1);
   });
 
-  
   it('не зберігає замовлення й не надсилає листа, якщо курс недоступний', async () => {
     const repo = new InMemoryOrderRepository();
 
-    rates.getRate = vi.fn().mockRejectedValue(
-      new Error('RATE_UNAVAILABLE'),
-    );
+    rates.getRate = vi.fn().mockRejectedValue(new Error('RATE_UNAVAILABLE'));
 
     const service = new OrderService(rates, repo, notifier);
 
@@ -81,7 +90,6 @@ describe('OrderService — заглушки й шпигуни', () => {
     expect(repo.size).toBe(0);
     expect(notifier.send).not.toHaveBeenCalled();
   });
-
 
   describe('фіксація часу', () => {
     beforeEach(() => {
@@ -103,30 +111,57 @@ describe('OrderService — заглушки й шпигуни', () => {
       expect(record.createdAt).toBe('2026-03-15T10:00:00.000Z');
     });
   });
+
   it('повторює спробу після невдачі', async () => {
-  vi.useFakeTimers();
-  const action = vi.fn()
-    .mockRejectedValueOnce(new Error('TIMEOUT'))
-    .mockResolvedValueOnce('ok');
- 
-  const promise = withRetry(action, 3, 1000);
-  await vi.advanceTimersByTimeAsync(1000);
- 
-  await expect(promise).resolves.toBe('ok');
-  expect(action).toHaveBeenCalledTimes(2);
-  vi.useRealTimers();
-});
- 
-it('після вичерпання спроб повертає останню помилку', async () => {
-  vi.useFakeTimers();
-  const action = vi.fn().mockRejectedValue(new Error('TIMEOUT'));
- 
-  const promise = withRetry(action, 3, 1000);
-  const assertion = expect(promise).rejects.toThrow('TIMEOUT');
-  await vi.advanceTimersByTimeAsync(2000);
- 
-  await assertion;
-  expect(action).toHaveBeenCalledTimes(3);
-  vi.useRealTimers();
-});
+    vi.useFakeTimers();
+    const action = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('TIMEOUT'))
+      .mockResolvedValueOnce('ok');
+
+    const promise = withRetry(action, 3, 1000);
+    await vi.advanceTimersByTimeAsync(1000);
+
+    await expect(promise).resolves.toBe('ok');
+    expect(action).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it('після вичерпання спроб повертає останню помилку', async () => {
+    vi.useFakeTimers();
+    const action = vi.fn().mockRejectedValue(new Error('TIMEOUT'));
+
+    const promise = withRetry(action, 3, 1000);
+    const assertion = expect(promise).rejects.toThrow('TIMEOUT');
+    await vi.advanceTimersByTimeAsync(2000);
+
+    await assertion;
+    expect(action).toHaveBeenCalledTimes(3);
+    vi.useRealTimers();
+  });
+
+  it('calls repository save exactly once', async () => {
+    const rates = {
+      getRate: vi.fn().mockResolvedValue(40),
+    };
+
+    const repo = {
+      save: vi.fn().mockResolvedValue(undefined),
+      findById: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const notifier = {
+      send: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const service = new OrderService(rates, repo, notifier);
+
+    await service.placeOrder({
+      id: 'EXP-1',
+      amountUsd: 100,
+      email: 'test@example.com',
+    });
+
+    expect(repo.save).toHaveBeenCalledTimes(1);
+  });
 });

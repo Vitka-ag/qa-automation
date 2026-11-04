@@ -1,4 +1,3 @@
-
 export interface ParkingOptions {
   night?: boolean;
   weekend?: boolean;
@@ -11,8 +10,7 @@ const DAILY_CAP = 200;
 const NIGHT_RATE = 0.5;
 const WEEKEND_RATE = 0.8;
 
-const round2 = (n: number): number =>
-  Math.round(n * 100) / 100;
+const round2 = (n: number): number => Math.round(n * 100) / 100;
 
 function assertValidDuration(minutes: number): void {
   if (!Number.isInteger(minutes) || minutes < 0) {
@@ -26,16 +24,10 @@ export function calcBaseFee(minutes: number): number {
 
   const extraHours = Math.ceil((minutes - 60) / 60);
 
-  return Math.min(
-    FIRST_HOUR_FEE + extraHours * EXTRA_HOUR_FEE,
-    DAILY_CAP,
-  );
+  return Math.min(FIRST_HOUR_FEE + extraHours * EXTRA_HOUR_FEE, DAILY_CAP);
 }
 
-export function applyRates(
-  fee: number,
-  options: ParkingOptions,
-): number {
+export function applyRates(fee: number, options: ParkingOptions): number {
   let result = fee;
 
   if (options.night) result *= NIGHT_RATE;
@@ -50,7 +42,5 @@ export function calcParkingFee(
 ): number {
   assertValidDuration(minutes);
 
-  return round2(
-    applyRates(calcBaseFee(minutes), options),
-  );
+  return round2(applyRates(calcBaseFee(minutes), options));
 }

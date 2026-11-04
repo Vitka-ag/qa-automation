@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server, RATE_URL } from './msw/server';
@@ -15,14 +14,16 @@ describe('HttpRateProvider', () => {
     server.use(
       http.get(RATE_URL, () => new HttpResponse(null, { status: 503 })),
     );
-    await expect(provider.getRate('USD', 'UAH')).rejects.toThrow('RATE_UNAVAILABLE');
+    await expect(provider.getRate('USD', 'UAH')).rejects.toThrow(
+      'RATE_UNAVAILABLE',
+    );
   });
 
   it('відхиляє курс у вигляді рядка', async () => {
-    server.use(
-      http.get(RATE_URL, () => HttpResponse.json({ rate: '41.25' })),
+    server.use(http.get(RATE_URL, () => HttpResponse.json({ rate: '41.25' })));
+    await expect(provider.getRate('USD', 'UAH')).rejects.toThrow(
+      'INVALID_RATE_FORMAT',
     );
-    await expect(provider.getRate('USD', 'UAH')).rejects.toThrow('INVALID_RATE_FORMAT');
   });
 
   it('передає параметри валют у запит', async () => {

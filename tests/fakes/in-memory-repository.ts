@@ -1,8 +1,8 @@
 import type { OrderRepository, OrderRecord } from '../../src/order-service';
- 
+
 export class InMemoryOrderRepository implements OrderRepository {
   private items = new Map<string, OrderRecord>();
- 
+
   async save(record: OrderRecord): Promise<void> {
     this.items.set(record.id, record);
   }
